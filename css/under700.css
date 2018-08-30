@@ -1,0 +1,14 @@
+body,td,th,p{
+  font-size: 10pt;
+}
+
+#restaurants-list {
+  align-items: center;
+  justify-content: space-around;
+}
+
+.filter-options {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
