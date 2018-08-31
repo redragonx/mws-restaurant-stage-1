@@ -14,9 +14,9 @@ module.exports = function(grunt) {
         options: {
           engine: 'im',
           sizes: [
-			{ name: "_320", quality: 60, width: 320, separator: '' },
-            { name: "_503", quality: 60, width: 503, separator: '' },
-            { name: "_900", quality: 60, width: 900, separator: '' }
+			{ name: "_450", quality: 60, width: 450, separator: '' },
+            { name: "_550", quality: 60, width: 550, separator: '' },
+            { name: "_900", quality: 70, width: 900, separator: '' }
 			]
         },
         files: [{
@@ -35,7 +35,7 @@ module.exports = function(grunt) {
       },
     },
 
-    /* Generate the images directory if it is missing */
+    /* Generate the images directory if itimageUrlForRestaurant is missing */
     mkdir: {
       dev: {
         options: {
