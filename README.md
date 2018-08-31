@@ -1,8 +1,9 @@
 
 # used nodejs server
+```
 npm install
 node server.js
-
+```
 
 # Mobile Web Specialist Certification Course
 ---

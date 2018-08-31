@@ -104,7 +104,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
     image.src = imgurl1x;
     image.srcset = `${imgurl1x} 450w, ${imgurl2x} 550w, ${imgurl3x} 900w`;
     image.sizes = `(max-width: 503px) 330px, (max-width: 900px) 413px, 900px`;
-    image.alt = restaurant.name + " marketing photograph";
+    image.alt = restaurant.name + " restaurant marketing photograph";
 
     /* Restaurant cuisine element */
     const cuisine = document.getElementById('restaurant-cuisine');
@@ -150,16 +150,10 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
         row.appendChild(time);
         hours.appendChild(row);
 
-        // Custom speech text for the time table.
-        var hourArray = operatingHours[key];
-        hourArray = hourArray.split('-');
-        var ariaHourString = hourArray[0] + ". and " + hourArray[1];
-
-        // our aria label
         var timeAriaLabel = document.createElement('label');
         timeAriaLabel.id = key + "_label";
         timeAriaLabel.className = "aria-label";
-        timeAriaLabel.innerHTML = key + ". hours are the following." + ariaHourString;
+        timeAriaLabel.innerHTML = key + ". hours are the following." + operatingHours[key];
         hours.append(timeAriaLabel)
     }
 }
@@ -189,55 +183,54 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
 /**
  * Create review HTML and add it to the webpage.
  */
- /**
+/**
   * Create review HTML and add it to the webpage.
   */
- createReviewHTML = (review) => {
+createReviewHTML = (review) => {
 
-   // Set random id
-   //http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
-   var randomizedID =  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-   var reviewID = randomizedID;
+    // Set random id
+    //http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
+    var randomizedID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    var reviewID = randomizedID;
 
-   const li = document.createElement('li');
-   const name = document.createElement('p');
-   name.innerHTML = review.name;
-   li.appendChild(name);
+    const li = document.createElement('li');
+    const name = document.createElement('p');
+    name.innerHTML = review.name;
+    li.appendChild(name);
 
-   const date = document.createElement('p');
-   date.innerHTML = review.date;
-   li.appendChild(date);
+    const date = document.createElement('p');
+    date.innerHTML = review.date;
+    li.appendChild(date);
 
-   const rating = document.createElement('p');
-   rating.innerHTML = `Rating: ${review.rating}`;
-   li.appendChild(rating);
+    const rating = document.createElement('p');
+    rating.innerHTML = `Rating: ${review.rating}`;
+    li.appendChild(rating);
 
-   const comments = document.createElement('p');
-   comments.innerHTML = review.comments;
-   li.appendChild(comments);
+    const comments = document.createElement('p');
+    comments.innerHTML = review.comments;
+    li.appendChild(comments);
 
-   // Add tab index for each review
-   var label_tabindex = document.createAttribute("tabindex");
-   label_tabindex.value = 0;
-   // Set the attirubte to the row
-   li.setAttributeNode(label_tabindex);
+    // Add tab index for each review
+    var label_tabindex = document.createAttribute("tabindex");
+    label_tabindex.value = 0;
+    // Set the attirubte to the row
+    li.setAttributeNode(label_tabindex);
 
-   // Add aria labelledby for each review
-   var label_attribute = document.createAttribute("aria-labelledby");
-   label_attribute.value = reviewID + "_label";
-   li.setAttributeNode(label_attribute);
+    // Add aria labelledby for each review
+    var label_attribute = document.createAttribute("aria-labelledby");
+    label_attribute.value = reviewID + "_label";
+    li.setAttributeNode(label_attribute);
 
-   // Add aria label for each review
-   var aria_label = document.createElement('label');
-   aria_label.id = reviewID + "_label";
-   aria_label.className = "aria-label";
-   aria_label.innerHTML = "Rating " + review.rating + " stars. Date " + review.date + ". Reviewed By " + review.name + ". Comments: " + review.comments;
+    // Add aria label for each review
+    var aria_label = document.createElement('label');
+    aria_label.id = reviewID + "_label";
+    aria_label.className = "aria-label";
+    aria_label.innerHTML = "Rating " + review.rating + " stars. Date " + review.date + ". Reviewed By " + review.name + ". Comments: " + review.comments;
 
-   li.appendChild(aria_label);
+    li.appendChild(aria_label);
 
-   return li;
- }
-
+    return li;
+}
 
 /**
  * Add restaurant name to the breadcrumb navigation menu
@@ -245,10 +238,20 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
 fillBreadcrumb = (restaurant = self.restaurant) => {
     const breadcrumb = document.getElementById('breadcrumb');
     const li = document.createElement('li');
-    li.innerHTML = restaurant.name;
+
+    const aLink = document.createElement('a');
+    var linkText = document.createTextNode(restaurant.name);
+    aLink.appendChild(linkText);
+    aLink.title = restaurant.name + "restaurant";
+    aLink.href = "#";
+    // Add aria attribution
+    var ariaAttribute = document.createAttribute("aria-current");
+    ariaAttribute.value = "page";
+
+    li.appendChild(aLink);
+    aLink.setAttributeNode(ariaAttribute);
     breadcrumb.appendChild(li);
 }
-
 
 /**
  * Get a parameter by name from page URL.

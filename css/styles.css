@@ -19,6 +19,13 @@ body, td, th, p {
     line-height: 1.5;
 }
 
+#breadcrumb [aria-current="page"] {
+  color: #000;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+
 ul, li {
     font-size: 10pt;
     color: #333;
@@ -103,7 +110,7 @@ nav h1 a {
 
 #breadcrumb li+li:before {
     padding: 8px;
-    color: orange;
+    color: red;
     content: "/\00a0";
 }
 
@@ -194,7 +201,7 @@ nav h1 a {
 }
 
 #restaurants-list li h1 {
-    color: #fff;
+    color: #bb2b2b;
     font-size: 16pt;
     font-weight: 200;
     letter-spacing: 0;
