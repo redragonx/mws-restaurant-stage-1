@@ -2,7 +2,7 @@
 var staticCacheName = 'mws-restaurant-static-db-';
 
 //http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
-var randomizedID = Math.random().toString(5).slice(2);
+var randomizedID = Math.random().toString(5).slice(3);
 var cacheID = randomizedID;
 
 staticCacheName += cacheID;
