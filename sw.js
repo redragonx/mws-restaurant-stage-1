@@ -3,7 +3,7 @@ var staticCacheName = 'mws-restaurant-static-db-';
 
 //http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
 var randomizedID = Math.random().toString(5).slice(2);
-var cacheID = 1;
+var cacheID = randomizedID;
 
 staticCacheName += cacheID;
 
@@ -13,11 +13,17 @@ self.addEventListener("install", function(event) {
             '/',
             '/index.html',
             '/restaurant.html',
-            '/css/*',
-            '/data/*',
-            '/img/*',
-            '/js/*',
-            'https://fonts.googleapis.com/css?family=Roboto:300,400,500'
+            '/css/styles.css',
+            '/css/under550.css',
+            '/css/under700.css',
+            '/js/dbhelper.js',
+            '/js/main.js',
+            '/js/restaurant_info.js',
+            '/js/swRegister.js',
+            '/data/restaurants.json',
+            'https://fonts.googleapis.com/css?family=Roboto:300,400,500',
+            'https://unpkg.com/leaflet@1.3.1/dist/leaflet.css',
+            'https://unpkg.com/leaflet@1.3.1/dist/leaflet.js'
         ]).catch(error => {});
     }));
 });
@@ -43,7 +49,7 @@ self.addEventListener("fetch", function(event) {
         // We handle the network request with success and failure scenarios.
             .then(fetchedFromNetwork, unableToResolve)
         // We should catch errors on the fetchedFromNetwork handler as well.
-            .catch(unableToResolve);
+            .catch(noCacheFileFound);
         console.log(
             'WORKER: fetch event', cached
             ? '(cached)'
@@ -77,6 +83,9 @@ self.addEventListener("fetch", function(event) {
         }
 
         function unableToResolve() {
+            return caches.match(request.event);
+        }
+        function noCacheFileFound() {
             return new Response('NO IIIIIINNNNNTERNEEEEEEEEEEEZ, run away', {
                 status: 503,
                 statusText: 'Service Unavailable',
