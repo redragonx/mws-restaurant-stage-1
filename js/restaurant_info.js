@@ -95,11 +95,11 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
     image.className = 'restaurant-img';
 
     let imgSrcBaseFolder = DBHelper.imageUrlForRestaurant(restaurant);
-    let imgName = imgSrcBaseFolder.substring(0, imgSrcBaseFolder.length - 4);
+    // let imgName = imgSrcBaseFolder.substring(0, imgSrcBaseFolder.length - 4);
 
-    const imgurl1x = imgName + "_450.jpg";
-    const imgurl2x = imgName + "_550.jpg";
-    const imgurl3x = imgName + "_900.jpg";
+    const imgurl1x = imgSrcBaseFolder + "_450.jpg";
+    const imgurl2x = imgSrcBaseFolder + "_550.jpg";
+    const imgurl3x = imgSrcBaseFolder + "_900.jpg";
 
     image.src = imgurl1x;
     image.srcset = `${imgurl1x} 450w, ${imgurl2x} 550w, ${imgurl3x} 900w`;
