@@ -69,7 +69,7 @@ class DBHelper {
                     return;
                 };
 
-                let tx = db.transaction(DB_TABLE_NAME, 'read');
+                let tx = db.transaction(DB_TABLE_NAME, 'readonly');
                 let store = tx.objectStore(DB_TABLE_NAME);
 
                 console.log('idb ', 'getting IDB: ' + data);

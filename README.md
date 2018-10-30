@@ -2,6 +2,7 @@
 # used nodejs server
 ```
 npm install
+cd app
 node server.js
 ```
 

@@ -34,7 +34,7 @@ gulp.task('delete-all-dist', function() {
     });
 });
 
-gulp.task('dist', ['delete-all-dist', 'copy-html', 'copy-metafiles', 'copy-images', 'styles-dev', 'scripts-dist']);
+gulp.task('dist', [ 'copy-html', 'copy-metafiles', 'copy-images', 'styles-dev',]);
 
 gulp.task('copy-html', function() {
     gulp.src('app/index.html').pipe(gulp.dest('./dist'));
