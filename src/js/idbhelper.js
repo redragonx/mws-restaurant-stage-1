@@ -1,9 +1,9 @@
+DB_TABLE_NAME = 'mws-restaurants';
+DB_REVIEW_TABLE_NAME = 'reviews';
 
-import idb from "./idb";
+
+
 class IDBHelper {
-    DB_TABLE_NAME = 'mws-restaurants';
-    DB_REVIEW_TABLE_NAME = 'reviews';
-
 
     static openDB(database) {
 
@@ -14,7 +14,7 @@ class IDBHelper {
             return Promise.resolve();
         }
 
-        let dbPromise = idb.open(database, 1, upgradeDb => {
+        let dbPromise = IDB.open(database, 1, upgradeDb => {
             switch (upgradeDb.oldVersion) {
                 case 0:
                     var mwsDBStore = upgradeDb.createObjectStore(DB_TABLE_NAME, {keyPath: 'id'});
@@ -38,7 +38,7 @@ class IDBHelper {
 
     /* Method to insert in an IDB */
     static insertIDB(data) {
-        return idb.openIDB().then(function(db) {
+        return IDB.openIDB().then(function(db) {
             db.onError = function(evt) {
                 console.log("error inserting something into the idb");
                 return;

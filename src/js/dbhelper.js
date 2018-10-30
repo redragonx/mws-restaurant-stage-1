@@ -1,3 +1,7 @@
+MWS_DB_NAME = 'mws-db';
+DB_TABLE_NAME = 'mws-restaurants';
+DB_REVIEW_TABLE_NAME = 'reviews';
+
 /**
  * Common database helper functions.
  */
@@ -8,9 +12,7 @@ class DBHelper {
 
         console.log('opening the IDB for mws');
 
-
-
-        let dbPromise = idb.open(database, 1, upgradeDb => {
+        let dbPromise = idb.open(MWS_DB_NAME, 1, upgradeDb => {
             switch (upgradeDb.oldVersion) {
                 case 0:
                     var mwsDBStore = upgradeDb.createObjectStore(DB_TABLE_NAME, {keyPath: 'id'});
@@ -54,11 +56,48 @@ class DBHelper {
 
             // Insert the mws data into the idb HERE
 
-            IDBHelper.insertFullMWSResponse(restaurants);
-
+            restaurants.forEach(function(restaurant) {
+                DBHelper.insertDataIDB(restaurant);
+            });
             callback(null, restaurants);
         }).catch(function(err) {
             console.log("Some error appended", err);
+
+            DBHelper.openDB().then(function (db) {
+                db.onError = function(evt) {
+                    console.log("error getting something from the idb");
+                    return;
+                };
+
+                let tx = db.transaction(DB_TABLE_NAME, 'read');
+                let store = tx.objectStore(DB_TABLE_NAME);
+
+                console.log('idb ', 'getting IDB: ' + data);
+                return store.getAll();
+
+            }).then(restaurants => {
+                console.log(restaurants);
+                callback(null, restaurants);
+            });
+        });
+    }
+
+    /* Method to insert in an IDB */
+    static insertDataIDB(data) {
+
+        return DBHelper.openDB().then(function(db) {
+            db.onError = function(evt) {
+                console.log("error inserting something into the idb");
+                return;
+            };
+
+            let tx = db.transaction(DB_TABLE_NAME, 'readwrite');
+            let store = tx.objectStore(DB_TABLE_NAME);
+
+            // console.log('Inserting in IDB: ' + data);
+            store.put(data);
+
+            return tx.complete;
         });
     }
 

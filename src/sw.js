@@ -17,6 +17,7 @@ self.addEventListener("install", function(event) {
             '/css/under550.css',
             '/css/under700.css',
             '/js/dbhelper.js',
+            '/js/idb.js',
             '/js/main.js',
             '/js/restaurant_info.js',
             '/js/swRegister.js',
@@ -85,6 +86,8 @@ self.addEventListener("fetch", function(event) {
         function unableToResolve() {
             return caches.match(request.event);
         }
+
+
         function noCacheFileFound() {
             return new Response('NO IIIIIINNNNNTERNEEEEEEEEEEEZ, run away', {
                 status: 503,
