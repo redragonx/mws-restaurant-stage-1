@@ -202,7 +202,7 @@ class DBHelper {
                 //callback(null, restaurant);
             } else {
                 // Restaurant does not exist in the database
-                callback("Restaurant does not exist", null);
+                callback("Restaurant (id: " + id + ") does not exist locally or the server is down. You might be offline. Try again later.", null);
             }
         }).catch(function(error) {
             // Try to load from the idb instead
@@ -323,9 +323,8 @@ class DBHelper {
             };
 
             objectStoreRequest.onerror = function(event) {
-                // report the success of our request
+                // report the failure of our request
 
-                callback("No Restaurant found", null);
                 return;
             };
 
@@ -338,7 +337,7 @@ class DBHelper {
                 callback(null, restaurant);
 
             } else {
-                callback("No restaurant", null);
+                callback("No Restaurant found in the IDB cache!", null);
             }
         });
     }

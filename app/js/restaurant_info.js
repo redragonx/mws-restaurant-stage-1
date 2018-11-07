@@ -68,12 +68,47 @@ fetchRestaurantFromURL = (callback) => {
             self.restaurant = restaurant;
             if (!restaurant) {
                 console.error(error);
+
+                // Get the modal
+                var modal = document.getElementById('myModal');
+
+                var modalContent = createModalContent(error);
+
+                modal.innerHTML = modalContent;
+
+                // Get the <span> element that closes the modal
+                var span = document.getElementsByClassName("close")[0];
+
+                modal.style.display = "block";
+
+                // When the user clicks on <span> (x), close the modal
+                span.onclick = function() {
+                    modal.style.display = "none";
+                }
+
+                // When the user clicks anywhere outside of the modal, close it
+                window.onclick = function(event) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                    }
+                }
                 return;
             }
             fillRestaurantHTML();
             callback(null, restaurant)
         });
     }
+}
+
+function createModalContent(text) {
+   return [
+           '<div class="modal-content">',
+           '<span class="close">&times;</span>',
+           '<center><p>',
+           text,
+           '</p></center>',
+           '</div>',
+          ].join('\n');
 }
 
 /**
