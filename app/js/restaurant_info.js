@@ -101,23 +101,32 @@ fetchRestaurantFromURL = (callback) => {
 }
 
 function createModalContent(text) {
-   return [
-           '<div class="modal-content">',
-           '<span class="close">&times;</span>',
-           '<center><p>',
-           text,
-           '</p></center>',
-           '</div>',
-          ].join('\n');
+    return [
+        '<div class="modal-content">',
+        '<span class="close">&times;</span>',
+        '<center><p>',
+        text,
+        '</p></center>',
+        '</div>'
+    ].join('\n');
 }
 
 /**
  * Create restaurant HTML and add it to the webpage
  */
 fillRestaurantHTML = (restaurant = self.restaurant) => {
-    const name = document.getElementById('restaurant-name');
-    name.innerHTML = restaurant.name;
 
+    const mainDiv = document.getElementById("maincontent");
+    const favDiv = document.getElementById("favSpan");
+
+    favDiv.innerHTML = createFavIcon(restaurant).outerHTML;
+
+    const favorite = document.getElementById("favorite-icon-" + restaurant.id);
+    //favDiv.onclick = event => handleFavoriteClick(restaurant);
+    favorite.onclick = event => handleFavoriteClick(restaurant);
+
+    const name = document.getElementById('restaurant-name');
+    name.innerHTML = restaurant.name; 
     const address = document.getElementById('restaurant-address');
     address.innerHTML = restaurant.address;
 
@@ -153,6 +162,33 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
     }
     // fill reviews
     fillReviewsHTML();
+}
+
+handleFavoriteClick = (restaurant) => {
+    // Update properties of the restaurant data object
+    const favorite = document.getElementById("favorite-icon-" + restaurant.id);
+    newFavState = !restaurant["is_favorite"];
+    console.log("handleFavoriteClick new state is: ", newFavState );
+
+    DBHelper.updateFavorite(restaurant.id, newFavState);
+
+    favorite.onclick = event => handleFavoriteClick(restaurant.id, newFavState);
+};
+
+createFavIcon = (restaurant) => {
+    const isFavorite = (restaurant["is_favorite"] && restaurant["is_favorite"].toString() === "true")
+        ? true
+        : false;
+
+    const favorite = document.createElement("button");
+    favorite.style.background = isFavorite
+        ? `url("/img/icons/likeBtns/like1.svg") no-repeat`
+        : `url("/img/icons/likeBtns/like0.svg") no-repeat`;
+    favorite.innerHTML = isFavorite
+        ? restaurant.name + " is a favorite"
+        : restaurant.name + " is not a favorite";
+    favorite.id = "favorite-icon-" + restaurant.id;
+    return favorite;
 }
 
 /**

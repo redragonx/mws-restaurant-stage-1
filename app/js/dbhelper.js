@@ -139,13 +139,103 @@ class DBHelper {
         xhr.send();
     }
 */
+
+    static updateFavorite(id, newState) {
+
+        // Block any more clicks on this until the callback
+        const fav = document.getElementById("favorite-icon-" + id);
+        fav.onclick = null;
+        console.log("updateFavorite");
+
+
+        DBHelper.updateFavoriteIDB(id, {"is_favorite": newState}, (newRestaurantUpdate) => {
+            const isFavorite = (newRestaurantUpdate["is_favorite"] && newRestaurantUpdate["is_favorite"].toString() === "true")
+                ? true
+                : false;
+
+                console.log("am i running updateFavoriteIDB callback");
+
+                const favoriteBtn = document.getElementById("favorite-icon-" + restaurant.id);
+
+                favoriteBtn.style.background = isFavorite
+                    ? `url("/img/icons/likeBtns/like1.svg") no-repeat`
+                    : `url("/img/icons/likeBtns/like0.svg") no-repeat`;
+                favoriteBtn.innerHTML = isFavorite
+                    ? newRestaurantUpdate.name + " is a favorite"
+                    : newRestaurantUpdate.name + " is not a favorite";
+                favorite.id = "favorite-icon-" + newRestaurantUpdate.id;
+
+                favoriteBtn.onclick = event => handleFavoriteClick(newRestaurantUpdate.id, !isFavorite);
+        });
+    }
+
+    static updateFavoriteIDB(id, newStateObj, callback) {
+
+        return DBHelper.openDB().then(function(db) {
+            db.onError = function(evt) {
+                console.log("error getting restaurant data for updating favorite option");
+                return;
+            };
+
+            console.log("I am in updateFavoriteIDB");
+
+            let tx = db.transaction(DB_RESTAURANTS_TABLE_NAME, 'readonly');
+            let store = tx.objectStore(DB_RESTAURANTS_TABLE_NAME);
+
+            var countRequest = store.count();
+            countRequest.onsuccess = function(evt) {
+                console.log(evt.target.value);
+              console.log(countRequest.result);
+            }
+
+            countRequest.onsuccess = function() {
+              console.log("errorrrrr");
+            }
+
+            let restaurant = null;
+            store.openCursor().onsuccess = function(event) {
+                console.log("cursor");
+                var cursor = event.target.result;
+                if (cursor && cursor.value.restaurant_id === id) {
+                    restaurant = cursor.value;
+
+                    console.log("restaurant is", restaurant);
+                } else {
+                    cursor.continue();
+                }
+            };
+
+            store.openCursor().onerror = function(event) {
+                // report the success of our request
+                console.log("why tho");
+
+                callback("No restaurant store", null);
+                return;
+            };
+
+            return restaurant;
+        }).then(restaurant => {
+            if (restaurant) {
+                restaurant["is_favorite"] = newStateObj;
+
+                console.log(restaurant);
+                return;
+                callback(restaurant);
+            } else {
+                //callback(null, restaurant);
+            }
+        });
+
+    }
+
+
     static addReviewsToIDB(reviews) {
 
         reviews.forEach(function(review) {
             // review.id = parseInt(review.id);
             DBHelper.insertDataIDB(DB_REVIEW_TABLE_NAME, review);
         });
-        console.log("I am called.");
+        console.log("I am called from addReviewsToIDB.");
 
     }
 
@@ -185,7 +275,7 @@ class DBHelper {
     static fetchRestaurantById(id, callback) {
 
         // Get the restaurant from the server
-
+        console.log("am i really getting errors from dbhelper?");
         fetch(DBHelper.DATABASE_URL + id).then((restaurantResp) => {
             //console.log(restaurantResp);
             if (!restaurantResp.ok) {
@@ -198,6 +288,7 @@ class DBHelper {
             if (restaurant) {
                 // now get the restaurant reviews before returning the actual restaurant json
 
+                console.log(restaurant);
                 DBHelper.fetchRestaurantReviews(restaurant, callback);
                 //callback(null, restaurant);
             } else {
@@ -206,7 +297,7 @@ class DBHelper {
             }
         }).catch(function(error) {
             // Try to load from the idb instead
-            console.log(error);
+            console.log("im in the fetchRestaurantById catch");
             DBHelper.getRestaurantFromIDB(id, callback);
         });
     }
@@ -255,7 +346,7 @@ class DBHelper {
       */
     static getReviewsFromIDB(restaurant, callback) {
         // load from idb instead...
-        console.log("Some error appended, but loading reviews from idb", err);
+        // console.log("Some error appended, but loading reviews from idb", err);
 
         DBHelper.openDB().then(function(db) {
             db.onError = function(evt) {
@@ -347,7 +438,7 @@ class DBHelper {
       */
     static getAllRestaurantsFromIDB(callback) {
         // load from idb instead...
-        console.log("Some error appended, but loading from idb", err);
+        console.log("Some error appended, but loading from idb");
 
         DBHelper.openDB().then(function(db) {
             db.onError = function(evt) {
@@ -358,7 +449,7 @@ class DBHelper {
             let tx = db.transaction(DB_RESTAURANTS_TABLE_NAME, 'readonly');
             let store = tx.objectStore(DB_RESTAURANTS_TABLE_NAME);
 
-            console.log('idb ', 'getting IDB: ' + data);
+            //console.log('idb ', 'getting IDB: ' + data);
             return store.getAll();
 
         }).then(restaurants => {
@@ -489,7 +580,6 @@ class DBHelper {
    * Restaurant image URL.
    */
     static imageUrlForRestaurant(restaurant) {
-        // console.log("wtf", restaurant);
         return (`/img/${restaurant.photograph}`);
     }
 

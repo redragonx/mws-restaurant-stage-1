@@ -13,6 +13,10 @@
     <script type="text/javascript" charset="utf-8" src="js/swRegister.js"></script>
     <script type="application/javascript" charset="utf-8" src="js/dbhelper.js"></script>
     <script type="application/javascript" charset="utf-8" src="js/restaurant_info.js"></script>
+
+    <script type="module">
+        import { Store, get, set } from '/js/idb-keyval.mjs';
+    </script>
     <!-- endbuild -->
 
     <!--build:css css/styles.min.css-->
@@ -62,6 +66,7 @@
                         <p id="restaurant-cuisine" tabindex="0" aria-labelledby="cuisine_label"></p>
                         <label id="cuisine_label" class="aria-label">Restaurant Cuisine</label>
                         <p id="restaurant-address" tabindex="0" aria-labelledby="address_label"></p>
+                        <span id="favSpan" tabindex="0" aria-labelledby="favStatus_label"></span>
                         <label id="address_label" class="aria-label">Restaurant Address</label>
                         <table id="restaurant-hours" tabindex="0" aria-labelledby="hours_label"></table>
                         <label id="hours_label" class="aria-label">Restaurant Hours</label>
