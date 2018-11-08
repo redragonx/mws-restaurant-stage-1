@@ -143,25 +143,34 @@ class DBHelper {
 
         console.log("updateFavorite");
 
-        DBHelper.updateFavoriteIDB(id, {"is_favorite": newState}, (newRestaurantUpdate) => {
+        DBHelper.updateFavoriteIDB(id, {
+            "is_favorite": newState
+        }, (newRestaurantUpdate) => {
             const isFavorite = (newRestaurantUpdate["is_favorite"] && newRestaurantUpdate["is_favorite"].toString() === "true")
                 ? true
                 : false;
 
-                console.log("am i running updateFavoriteIDB callback");
+            console.log("am i running updateFavoriteIDB callback");
 
-                const favoriteBtn = document.getElementById("favorite-icon-" + newRestaurantUpdate.id);
+            const favoriteBtn = document.getElementById("favorite-icon-" + newRestaurantUpdate.id);
 
-                favoriteBtn.style.background = isFavorite
-                    ? `url("/img/icons/likeBtns/like1.svg") no-repeat`
-                    : `url("/img/icons/likeBtns/like0.svg") no-repeat`;
-                favoriteBtn.innerHTML = isFavorite
-                    ? newRestaurantUpdate.name + " is a favorite"
-                    : newRestaurantUpdate.name + " is not a favorite";
-                favoriteBtn.id = "favorite-icon-" + newRestaurantUpdate.id;
+            favoriteBtn.style.background = isFavorite
+                ? `url("/img/icons/likeBtns/like1.svg") no-repeat`
+                : `url("/img/icons/likeBtns/like0.svg") no-repeat`;
+            favoriteBtn.innerHTML = isFavorite
+                ? newRestaurantUpdate.name + " is a favorite"
+                : newRestaurantUpdate.name + " is not a favorite";
+            favoriteBtn.id = "favorite-icon-" + newRestaurantUpdate.id;
+            // reset eventHandler
+            favoriteBtn.onclick = event => handleFavoriteClick(newRestaurantUpdate);
 
-                favoriteBtn.onclick = event => handleFavoriteClick(newRestaurantUpdate);
-        });
+            // Finally update favorite on the server.
+            let dataURL = DBHelper.DATABASE_URL + id + '/?is_favorite=';
+            dataURL = dataURL + newRestaurantUpdate["is_favorite"];
+            fetch(dataURL, {method: 'PUT'}).then(response => response.json());
+
+            });
+
     }
 
     static updateFavoriteIDB(id, newStateObj, callback) {
@@ -186,14 +195,13 @@ class DBHelper {
                 DBHelper.insertDataIDB(DB_RESTAURANTS_TABLE_NAME, restaurant)
                 callback(restaurant);
             } else {
-                console.log("This shouldn't happen!");
+                console.log("This shouldn't happen! Database was deleted. Reload main page to fix.");
             }
         }).catch((err) => {
             console.log("error getting restaurant data for updating favorite option.", err);
             return;
         });
     }
-
 
     static addReviewsToIDB(reviews) {
 
@@ -263,47 +271,40 @@ class DBHelper {
             }
         }).catch(function(error) {
             // Try to load from the idb instead
+            console.log(error);
             console.log("im in the fetchRestaurantById catch");
             DBHelper.getRestaurantFromIDB(id, callback);
         });
     }
-
     /**
       * fetch a single restaurant from idb
       */
     static getRestaurantFromIDB(id, callback) {
-        // load from idb instead...
-        console.log("Some error appended, but loading from idb", err);
 
-        DBHelper.openDB().then(function(db) {
-            db.onError = function(evt) {
-                console.log("error getting restaurant from the idb: " + id);
-                return;
-            };
+        return DBHelper.openDB().then(function(db) {
+            console.log("I am in updateFavoriteIDB");
 
             let tx = db.transaction(DB_RESTAURANTS_TABLE_NAME, 'readonly');
             let store = tx.objectStore(DB_RESTAURANTS_TABLE_NAME);
 
-            // Make a request to get a record by key from the object store
-            let objectStoreRequest = objectStore.get(id);
-            let restaurant = {};
-
-            objectStoreRequest.onsuccess = function(event) {
-                // report the success of our request
-
-                restaurant = objectStoreRequest.result;
-            };
-
-            objectStoreRequest.onerror = function(event) {
-                callback("No Restaurant found", null);
-                return;
-            };
+            let restaurant = store.get(id).then((newRestaurant) => {
+                return newRestaurant;
+            });
 
             return restaurant;
 
         }).then(restaurant => {
             // console.log(restaurant);
-            DBHelper.fetchRestaurantReviews(restaurant, callback);
+            if (restaurant) {
+                DBHelper.fetchRestaurantReviews(restaurant, callback);
+                callback(null, restaurant);
+
+            } else {
+                callback("getRestaurantFromIDB: No Restaurant found in the IDB cache!", null);
+            }
+        }).catch(() => {
+            console.log("error getting something from the idb");
+            return;
         });
     }
 
@@ -353,37 +354,6 @@ class DBHelper {
         });
     }
 
-    /**
-      * fetch a single restaurant from idb
-      */
-    static getRestaurantFromIDB(id, callback) {
-
-        DBHelper.openDB().then(function(db) {
-            db.onError = function(evt) {
-            };
-
-            let tx = db.transaction(DB_RESTAURANTS_TABLE_NAME, 'readonly');
-            let store = tx.objectStore(DB_RESTAURANTS_TABLE_NAME);
-
-            // Make a request to get a record by key from the object store
-            let restaurant = store.get(id);
-
-            return restaurant;
-
-        }).then(restaurant => {
-            // console.log(restaurant);
-            if (restaurant) {
-                DBHelper.fetchRestaurantReviews(restaurant, callback);
-                callback(null, restaurant);
-
-            } else {
-                callback("No Restaurant found in the IDB cache!", null);
-            }
-        }).catch(() => {
-            console.log("error getting something from the idb");
-            return;
-        });
-    }
 
     /**
       * fetch all restaurants from idb
@@ -393,10 +363,6 @@ class DBHelper {
         console.log("Some error appended, but loading from idb");
 
         DBHelper.openDB().then(function(db) {
-            db.onError = function(evt) {
-                console.log("error getting something from the idb");
-                return;
-            };
 
             let tx = db.transaction(DB_RESTAURANTS_TABLE_NAME, 'readonly');
             let store = tx.objectStore(DB_RESTAURANTS_TABLE_NAME);
@@ -407,6 +373,9 @@ class DBHelper {
         }).then(restaurants => {
             console.log(restaurants);
             callback(null, restaurants);
+        }).catch((err) => {
+            console.log("error getting something from the idb");
+            return;
         });
     }
 

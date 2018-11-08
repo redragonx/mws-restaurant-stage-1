@@ -176,6 +176,9 @@ handleFavoriteClick = (restaurant) => {
     //favorite.onclick = event => handleFavoriteClick(restaurant.id, newFavState);
 };
 
+handleNewReviewClick = () => {
+    
+}
 createFavIcon = (restaurant) => {
     const isFavorite = (restaurant["is_favorite"] && restaurant["is_favorite"].toString() === "true")
         ? true

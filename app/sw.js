@@ -13,6 +13,8 @@ self.addEventListener("install", function(event) {
             '/',
             '/index.html',
             '/restaurant.html',
+            '/css/reviews.css',
+            '/css/simpleModalBox.css',
             '/css/styles.css',
             '/css/under550.css',
             '/css/under700.css',
@@ -21,10 +23,9 @@ self.addEventListener("install", function(event) {
             '/js/main.js',
             '/js/restaurant_info.js',
             '/js/swRegister.js',
-            '/data/restaurants.json',
+            '/img/icons/likeBtns/like0.svg',
+            '/img/icons/likeBtns/like1.svg',
             'https://fonts.googleapis.com/css?family=Roboto:300,400,500',
-            'https://unpkg.com/leaflet@1.3.1/dist/leaflet.css',
-            'https://unpkg.com/leaflet@1.3.1/dist/leaflet.js'
         ]).catch(error => {});
     }));
 });
@@ -45,55 +46,40 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", function(event) {
     console.log('WORKER: fetch event in progress.');
 
-    event.respondWith(caches.match(event.request).then(function(cached) {
-        var fetchedRes = fetch(event.request)
-        // We handle the network request with success and failure scenarios.
-            .then(fetchedFromNetwork, unableToResolve)
-        // We should catch errors on the fetchedFromNetwork handler as well.
-            .catch(noCacheFileFound);
-        console.log(
-            'WORKER: fetch event', cached
-            ? '(cached)'
-            : '(network)',
-        event.request.url);
-        return cached || fetchedRes;
+    self.addEventListener('fetch', function (event) {
 
-        function fetchedFromNetwork(response) {
-            /* We copy the response before replying to the network request.
-             * This is the response that will be stored on the ServiceWorker cache.
-             */
-            var cacheCopy = response.clone();
-
-            console.log('WORKER: fetch response from network.', event.request.url);
-
-            caches
-            // We open a cache to store the response for this request.
-                .open(staticCacheName).then(function add(cache) {
-
-                /* We store the response for this request. It'll later become
-                 available to caches.match(event.request) calls, when looking
-                 for cached responses.
-                */
-                return cache.put(event.request, cacheCopy);
-            }).then(function() {
-                console.log('WORKER: fetch response stored in cache.', event.request.url);
-            });
-
-            // Return the response so that the promise is settled in fulfillment.
-            return response;
-        }
-
-        function unableToResolve() {
-            return caches.match(request.event);
-        }
-
-
-        function noCacheFileFound() {
-            return new Response('NO IIIIIINNNNNTERNEEEEEEEEEEEZ, run away', {
-                status: 503,
-                statusText: 'Service Unavailable',
-                headers: new Headers({'Content-Type': 'text/html'})
-            });
-        }
-    }));
+        event.respondWith(
+            caches.match(event.request, {ignoreSearch: true})
+                .then(function (response) {
+                    if (response) {
+                        /* response was cached already, return it */
+                        //console.log("served from cache :" + event.request.url);
+                        return response;
+                    }
+                    else {
+                        /* we need to go to the network to fetch response */
+                        return fetch(event.request)
+                            .then(function (response) {
+                                /* TODO: make this test more generic, at least for review content */
+                                if ((!event.request.url.match(/^https:\/\/api.tiles.mapbox.com\//)) &&
+                                    (!event.request.url.match(/^http:\/\/localhost:1337\//))) {
+                                    /* don't cache maps or reviews content */
+                                    return caches.open(staticCacheName)
+                                        .then(function (cache) {
+                                            cache.put(event.request.url, response.clone());
+                                            /* lastly, pass the response back */
+                                            return response;
+                                        })
+                                }
+                                else {
+                                    return response;
+                                }
+                            })
+                            .catch(function (error) {
+                                /* errors are normal when there's no net connection - shut it up */
+                            });
+                    }
+                })
+        );
+    });
 });
