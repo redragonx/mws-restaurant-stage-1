@@ -1,0 +1,73 @@
+
+#new-review {
+    padding: 20px;
+    max-width: 100%;
+    font-size: 1.25em;
+}
+
+#review-form {
+    max-width: 100%;
+}
+
+#review-form label {
+    float: right;
+    padding-right: 20px;
+}
+
+#review-form input[type="text"] {
+    width: 95%;
+    height: 48px;
+    font-size: 1em;
+}
+
+#review-form textarea {
+    width: 95%;
+    height: 15em;
+    font-size: 1em;
+}
+
+#review-form select {
+    width: 96px;
+    height: 48px;
+    align-content: center;
+    font-size: 1em;
+}
+
+input[type="submit"] {
+    height: 48px;
+    font-size: 1em;
+    background: #fefefe;
+}
+
+input[type="submit"]:hover {
+    height: 48px;
+    font-size: 1em;
+    background-color: #f80;
+}
+
+#new-review {
+    border-radius: 5px;
+    padding: 20%s;
+}
+
+.col-20 {
+    float: left;
+    width: 25%;
+    margin-top: 6px;
+}
+
+.col-80 {
+    float: left;
+    width: 55%;
+    margin-top: 6px;
+}
+
+.row {
+    padding-bottom: 10px;
+}
+
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
