@@ -25,7 +25,7 @@ self.addEventListener("install", function(event) {
             '/js/swRegister.js',
             '/img/icons/likeBtns/like0.svg',
             '/img/icons/likeBtns/like1.svg',
-            'https://fonts.googleapis.com/css?family=Roboto:300,400,500',
+            'https://fonts.googleapis.com/css?family=Roboto:300,400,500'
         ]).catch(error => {});
     }));
 });
@@ -43,43 +43,30 @@ self.addEventListener("activate", event => {
     }).then(() => self.clients.claim()));
 });
 
-self.addEventListener("fetch", function(event) {
-    console.log('WORKER: fetch event in progress.');
+self.addEventListener('fetch', function(event) {
 
-    self.addEventListener('fetch', function (event) {
-
-        event.respondWith(
-            caches.match(event.request, {ignoreSearch: true})
-                .then(function (response) {
-                    if (response) {
-                        /* response was cached already, return it */
-                        //console.log("served from cache :" + event.request.url);
+    event.respondWith(caches.match(event.request, {ignoreSearch: true}).then(function(response) {
+        if (response) {
+            /* response was cached already, return it */
+            //console.log("served from cache :" + event.request.url);
+            return response;
+        } else {
+            /* we need to go to the network to fetch response */
+            return fetch(event.request).then(function(response) {
+                /* TODO: make this test more generic, at least for review content */
+                if ((!event.request.url.match(/^https:\/\/api.tiles.mapbox.com\//)) && (!event.request.url.match(/^http:\/\/localhost:1337\//))) {
+                    /* don't cache maps or reviews content */
+                    return caches.open(staticCacheName).then(function(cache) {
+                        cache.put(event.request.url, response.clone());
+                        /* lastly, pass the response back */
                         return response;
-                    }
-                    else {
-                        /* we need to go to the network to fetch response */
-                        return fetch(event.request)
-                            .then(function (response) {
-                                /* TODO: make this test more generic, at least for review content */
-                                if ((!event.request.url.match(/^https:\/\/api.tiles.mapbox.com\//)) &&
-                                    (!event.request.url.match(/^http:\/\/localhost:1337\//))) {
-                                    /* don't cache maps or reviews content */
-                                    return caches.open(staticCacheName)
-                                        .then(function (cache) {
-                                            cache.put(event.request.url, response.clone());
-                                            /* lastly, pass the response back */
-                                            return response;
-                                        })
-                                }
-                                else {
-                                    return response;
-                                }
-                            })
-                            .catch(function (error) {
-                                /* errors are normal when there's no net connection - shut it up */
-                            });
-                    }
-                })
-        );
-    });
+                    })
+                } else {
+                    return response;
+                }
+            }).catch(function(error) {
+                /* errors are normal when there's no net connection - shut it up */
+            });
+        }
+    }));
 });
