@@ -91,10 +91,6 @@ class DBHelper {
     static insertDataIDB(tableName, data) {
 
         return DBHelper.openDB().then(function(db) {
-            db.onError = function(evt) {
-                console.log("error inserting something into the idb");
-                return;
-            };
 
             let tx = db.transaction(tableName, 'readwrite');
             let store = tx.objectStore(tableName);
@@ -103,6 +99,9 @@ class DBHelper {
             store.put(data);
 
             return tx.complete;
+        }).catch((err) => {
+            console.log("error inserting something into the idb", err);
+            return;
         });
     }
 
@@ -155,7 +154,7 @@ class DBHelper {
 
                 console.log("am i running updateFavoriteIDB callback");
 
-                const favoriteBtn = document.getElementById("favorite-icon-" + restaurant.id);
+                const favoriteBtn = document.getElementById("favorite-icon-" + newRestaurantUpdate.id);
 
                 favoriteBtn.style.background = isFavorite
                     ? `url("/img/icons/likeBtns/like1.svg") no-repeat`
@@ -163,7 +162,7 @@ class DBHelper {
                 favoriteBtn.innerHTML = isFavorite
                     ? newRestaurantUpdate.name + " is a favorite"
                     : newRestaurantUpdate.name + " is not a favorite";
-                favorite.id = "favorite-icon-" + newRestaurantUpdate.id;
+                favoriteBtn.id = "favorite-icon-" + newRestaurantUpdate.id;
 
                 favoriteBtn.onclick = event => handleFavoriteClick(newRestaurantUpdate.id, !isFavorite);
         });
@@ -172,60 +171,31 @@ class DBHelper {
     static updateFavoriteIDB(id, newStateObj, callback) {
 
         return DBHelper.openDB().then(function(db) {
-            db.onError = function(evt) {
-                console.log("error getting restaurant data for updating favorite option");
-                return;
-            };
 
             console.log("I am in updateFavoriteIDB");
 
             let tx = db.transaction(DB_RESTAURANTS_TABLE_NAME, 'readonly');
             let store = tx.objectStore(DB_RESTAURANTS_TABLE_NAME);
 
-            var countRequest = store.count();
-            countRequest.onsuccess = function(evt) {
-                console.log(evt.target.value);
-              console.log(countRequest.result);
-            }
-
-            countRequest.onsuccess = function() {
-              console.log("errorrrrr");
-            }
-
-            let restaurant = null;
-            store.openCursor().onsuccess = function(event) {
-                console.log("cursor");
-                var cursor = event.target.result;
-                if (cursor && cursor.value.restaurant_id === id) {
-                    restaurant = cursor.value;
-
-                    console.log("restaurant is", restaurant);
-                } else {
-                    cursor.continue();
-                }
-            };
-
-            store.openCursor().onerror = function(event) {
-                // report the success of our request
-                console.log("why tho");
-
-                callback("No restaurant store", null);
-                return;
-            };
+            let restaurant = store.get(id).then((newRestaurant) => {
+                return newRestaurant;
+            });
 
             return restaurant;
         }).then(restaurant => {
             if (restaurant) {
-                restaurant["is_favorite"] = newStateObj;
+                restaurant["is_favorite"] = newStateObj.is_favorite;
 
                 console.log(restaurant);
-                return;
+                DBHelper.insertDataIDB(DB_RESTAURANTS_TABLE_NAME, restaurant)
                 callback(restaurant);
             } else {
-                //callback(null, restaurant);
+                console.log("This shouldn't happen!");
             }
+        }).catch((err) => {
+            console.log("error getting restaurant data for updating favorite option.", err);
+            return;
         });
-
     }
 
 

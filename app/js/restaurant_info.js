@@ -126,7 +126,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
     favorite.onclick = event => handleFavoriteClick(restaurant);
 
     const name = document.getElementById('restaurant-name');
-    name.innerHTML = restaurant.name; 
+    name.innerHTML = restaurant.name;
     const address = document.getElementById('restaurant-address');
     address.innerHTML = restaurant.address;
 
