@@ -176,9 +176,6 @@ handleFavoriteClick = (restaurant) => {
     //favorite.onclick = event => handleFavoriteClick(restaurant.id, newFavState);
 };
 
-handleNewReviewClick = () => {
-
-}
 createFavIcon = (restaurant) => {
     const isFavorite = (restaurant["is_favorite"] && restaurant["is_favorite"].toString() === "true")
         ? true
@@ -242,6 +239,8 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
     title.innerHTML = 'Reviews';
     container.appendChild(title);
 
+    reviews = reviews.reverse();
+
     if (!reviews) {
         const noReviews = document.createElement('p');
         noReviews.innerHTML = 'No reviews yet!';
@@ -255,9 +254,6 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
     container.appendChild(ul);
 }
 
-/**
- * Create review HTML and add it to the webpage.
- */
 /**
   * Create review HTML and add it to the webpage.
   */
@@ -347,6 +343,8 @@ getParameterByName = (name, url) => {
 reviewSubmit = () => {
     let reviewForm = document.getElementById('review-form').elements;
 
+    console.log(this.restaurant);
+
     const review = {
         restaurant_id: this.restaurant.id,
         name: reviewForm['reviewer-name'].value,
@@ -355,7 +353,7 @@ reviewSubmit = () => {
     };
 
     const message = {
-        urlRoot: DBHelper.DATABASE_URL,
+        urlRoot: DBHelper.REVIEW_URL,
         review: review
     };
 
@@ -366,7 +364,42 @@ reviewSubmit = () => {
     document.getElementById('reviewer-rating').value = "3";
     document.getElementById('reviewer-comment').value = "";
 
-    /* TODO: notify user that we're working on it */
+    // Get the modal
+    var modal = document.getElementById('myModal');
+
+
+    //Notify the user about their review.
+
+    let isOnline = null;
+
+    if (navigator.onLine) {
+        isOnline = "Online";
+    } else {
+        isOnline = "Offline";
+    }
+
+
+    var modalContent = createModalContent("Your review is added. It will be sent whenever you're online. Current status: " + isOnline);
+    modal.innerHTML = modalContent;
+
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close")[0];
+
+    modal.style.display = "block";
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    // createModalContent("Your review is added. It will be sent whenever you're online. Current Status: " + navigator.onLine)
 
     return false;
 };
@@ -385,4 +418,32 @@ channel.onmessage = (ev) => {
          */
         fillReviewsListHTML();
     }
+};
+
+
+fillReviewsListHTML = (reviews = self.restaurant.reviews) => {
+
+    const list = document.getElementById('reviews-list');
+
+    /* remove all the old reviews */
+    while (list.hasChildNodes()) {
+        list.removeChild(list.lastChild);
+    }
+
+    if (!reviews) {
+        const noReviews = document.createElement('p');
+        noReviews.innerHTML = 'No reviews yet!';
+        list.appendChild(noReviews);
+        return;
+    }
+
+    // new reviews first
+
+    reviews = reviews.reverse();
+
+    reviews.forEach(review => {
+        list.appendChild(createReviewHTML(review));
+    });
+
+    document.getElementById("reviews-list").firstChild.className = "highlight";
 };

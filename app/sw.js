@@ -1,3 +1,5 @@
+importScripts('js/idb.js', 'js/dbhelper.js');
+
 // Define the Caches
 var staticCacheName = 'mws-restaurant-static-db-1';
 
@@ -110,10 +112,10 @@ self.addEventListener('sync', function (event) {
             return store.getAll();
         })
             .then((messages) => {
+
                 return Promise.all(messages.map(function (message) {
 
                     const postUrl = message.urlRoot;
-
                     return fetch(postUrl, {
                         method: 'POST',
                         cache: "no-cache",
@@ -125,15 +127,17 @@ self.addEventListener('sync', function (event) {
                         .then((response) => {
                             return response.json();
                         })
-                        .then((rrr) => {
-                            console.log('resp ', rrr);
-                            /* TODO: pass back received reply from remote DB to page so it can update */
-                            channel.postMessage(rrr);
+                        .then((newResp) => {
+                            channel.postMessage(newResp);
 
-                            return store.outbox('readwrite')
-                                .then((outbox) => {
-                                    console.log('sent and purged id #' + message.id);
-                                    return outbox.delete(message.id);
+                            return DBHelper.openDB()
+                                .then((db) => {
+
+                                    let transaction = db.transaction(DB_PENDING_REVIEW_TABLE_NAME, 'readwrite');
+                                    let store = transaction.objectStore(DB_PENDING_REVIEW_TABLE_NAME);
+
+                                    store.delete(message.id);
+                                    return transaction.complete;
                                 });
                         })
                 }))
@@ -142,6 +146,4 @@ self.addEventListener('sync', function (event) {
                 console.error(err);
             })
     );
-
-    /* TODO: pass back received reply from remote DB to page so it can update */
 });

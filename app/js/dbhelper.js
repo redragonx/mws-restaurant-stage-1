@@ -25,7 +25,7 @@ class DBHelper {
 
                 case 2:
                     var tempReviewStore = upgradeDb.createObjectStore(DB_PENDING_REVIEW_TABLE_NAME, {keyPath: 'id', autoIncrement: true});
-                    tempReviewStore.createIndex('by-id', 'id');
+                    // tempReviewStore.createIndex('by-id', 'id');
 
             }
         });
@@ -467,7 +467,11 @@ class DBHelper {
         return DBHelper.openDB().then((db) => {
 
             let transaction = db.transaction(DB_PENDING_REVIEW_TABLE_NAME, 'readwrite');
-            return transaction.objectStore(DB_PENDING_REVIEW_TABLE_NAME).put(msg);
+            let store = transaction.objectStore(DB_PENDING_REVIEW_TABLE_NAME);
+
+            store.add(msg);
+
+            return transaction.complete;
 
         }).then(function() {
 

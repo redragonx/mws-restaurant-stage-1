@@ -34,7 +34,7 @@ gulp.task('delete-all-dist', function() {
     });
 });
 
-gulp.task('dist', [ 'copy-html', 'copy-metafiles', 'copy-images', 'styles-dev',]);
+gulp.task('dist', [ 'copy-html', 'copy-metafiles', 'copy-images', 'scripts-dev', 'styles-dev',]);
 
 gulp.task('copy-html', function() {
     gulp.src('app/index.html').pipe(gulp.dest('./dist'));
@@ -51,7 +51,7 @@ gulp.task('copy-images', function() {
     gulp.src('img/*').pipe(gulp.dest('dist/img'));
 });
 gulp.task('scripts-dev', function() {
-    return gulp.src('app/js/*.js').pipe(sourcemaps.init()).pipe(babel()).pipe(uglify()).pipe(sourcemaps.write()).pipe(gulp.dest('./dist/js'))
+    return gulp.src('app/js/*.js').pipe(sourcemaps.init()).pipe(uglify()).pipe(sourcemaps.write()).pipe(gulp.dest('./dist/js'))
 });
 gulp.task('styles-dev', function() {
     gulp.src('app/sass/**/*.sass').pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError)).pipe(autoprefixer({browsers: ['last 2 versions']})).pipe(gulp.dest('dist/css')).pipe(browserSync.stream());
