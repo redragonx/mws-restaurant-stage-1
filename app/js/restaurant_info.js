@@ -177,7 +177,7 @@ handleFavoriteClick = (restaurant) => {
 };
 
 handleNewReviewClick = () => {
-    
+
 }
 createFavIcon = (restaurant) => {
     const isFavorite = (restaurant["is_favorite"] && restaurant["is_favorite"].toString() === "true")
@@ -343,3 +343,46 @@ getParameterByName = (name, url) => {
         return '';
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
+
+reviewSubmit = () => {
+    let reviewForm = document.getElementById('review-form').elements;
+
+    const review = {
+        restaurant_id: this.restaurant.id,
+        name: reviewForm['reviewer-name'].value,
+        rating: reviewForm['reviewer-rating'].value,
+        comments: reviewForm['reviewer-comment'].value
+    };
+
+    const message = {
+        urlRoot: DBHelper.DATABASE_URL,
+        review: review
+    };
+
+    /* queue outbound update */
+    DBHelper.queueMessage(message);
+
+    document.getElementById('reviewer-name').value = "";
+    document.getElementById('reviewer-rating').value = "3";
+    document.getElementById('reviewer-comment').value = "";
+
+    /* TODO: notify user that we're working on it */
+
+    return false;
+};
+
+const channel = new BroadcastChannel('updates');
+
+channel.onmessage = (ev) => {
+    if (parseInt(this.restaurant.id) === parseInt(ev.data.restaurant_id)) {
+        console.log('update for me');
+        this.restaurant.reviews.push(ev.data);
+
+        /*
+         * I decided not to update the reviews on the page until after
+         * the server has been updated, if we're offline the dates of the
+         * reviews could be different after a refresh.
+         */
+        fillReviewsListHTML();
+    }
+};

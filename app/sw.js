@@ -1,11 +1,5 @@
 // Define the Caches
-var staticCacheName = 'mws-restaurant-static-db-';
-
-//http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
-var randomizedID = Math.random().toString(5).slice(3);
-var cacheID = randomizedID;
-
-staticCacheName += cacheID;
+var staticCacheName = 'mws-restaurant-static-db-1';
 
 self.addEventListener("install", function(event) {
     event.waitUntil(caches.open(staticCacheName).then(function(cache) {
@@ -43,30 +37,111 @@ self.addEventListener("activate", event => {
     }).then(() => self.clients.claim()));
 });
 
-self.addEventListener('fetch', function(event) {
 
-    event.respondWith(caches.match(event.request, {ignoreSearch: true}).then(function(response) {
-        if (response) {
-            /* response was cached already, return it */
-            //console.log("served from cache :" + event.request.url);
+self.addEventListener("fetch", function(event) {
+    console.log('WORKER: fetch event in progress.');
+
+    event.respondWith(caches.match(event.request).then(function(cached) {
+        var fetchedRes = fetch(event.request)
+        // We handle the network request with success and failure scenarios.
+            .then(fetchedFromNetwork, unableToResolve)
+        // We should catch errors on the fetchedFromNetwork handler as well.
+            .catch(noCacheFileFound);
+        console.log(
+            'WORKER: fetch event', cached
+            ? '(cached)'
+            : '(network)',
+        event.request.url);
+        return cached || fetchedRes;
+
+        function fetchedFromNetwork(response) {
+            /* We copy the response before replying to the network request.
+             * This is the response that will be stored on the ServiceWorker cache.
+             */
+            var cacheCopy = response.clone();
+
+            console.log('WORKER: fetch response from network.', event.request.url);
+
+            caches
+            // We open a cache to store the response for this request.
+                .open(staticCacheName).then(function add(cache) {
+
+                /* We store the response for this request. It'll later become
+                 available to caches.match(event.request) calls, when looking
+                 for cached responses.
+                */
+                return cache.put(event.request, cacheCopy);
+            }).then(function() {
+                console.log('WORKER: fetch response stored in cache.', event.request.url);
+            });
+
+            // Return the response so that the promise is settled in fulfillment.
             return response;
-        } else {
-            /* we need to go to the network to fetch response */
-            return fetch(event.request).then(function(response) {
-                /* TODO: make this test more generic, at least for review content */
-                if ((!event.request.url.match(/^https:\/\/api.tiles.mapbox.com\//)) && (!event.request.url.match(/^http:\/\/localhost:1337\//))) {
-                    /* don't cache maps or reviews content */
-                    return caches.open(staticCacheName).then(function(cache) {
-                        cache.put(event.request.url, response.clone());
-                        /* lastly, pass the response back */
-                        return response;
-                    })
-                } else {
-                    return response;
-                }
-            }).catch(function(error) {
-                /* errors are normal when there's no net connection - shut it up */
+        }
+
+        function unableToResolve() {
+            return caches.match(request.event);
+        }
+
+
+        function noCacheFileFound() {
+            return new Response('NO IIIIIINNNNNTERNEEEEEEEEEEEZ, run away', {
+                status: 503,
+                statusText: 'Service Unavailable',
+                headers: new Headers({'Content-Type': 'text/html'})
             });
         }
     }));
+});
+
+
+
+
+const channel = new BroadcastChannel('updates');
+
+self.addEventListener('sync', function (event) {
+
+    event.waitUntil(
+         DBHelper.openDB().then((db) => {
+
+            let transaction = db.transaction(DB_PENDING_REVIEW_TABLE_NAME, 'readonly');
+            let store = transaction.objectStore(DB_PENDING_REVIEW_TABLE_NAME);
+
+            return store.getAll();
+        })
+            .then((messages) => {
+                return Promise.all(messages.map(function (message) {
+
+                    const postUrl = message.urlRoot;
+
+                    return fetch(postUrl, {
+                        method: 'POST',
+                        cache: "no-cache",
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(message.review)
+                    })
+                        .then((response) => {
+                            return response.json();
+                        })
+                        .then((rrr) => {
+                            console.log('resp ', rrr);
+                            /* TODO: pass back received reply from remote DB to page so it can update */
+                            channel.postMessage(rrr);
+
+                            return store.outbox('readwrite')
+                                .then((outbox) => {
+                                    console.log('sent and purged id #' + message.id);
+                                    return outbox.delete(message.id);
+                                });
+                        })
+                }))
+            })
+            .catch((err) => {
+                console.error(err);
+            })
+    );
+
+    /* TODO: pass back received reply from remote DB to page so it can update */
 });
