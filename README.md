@@ -1,21 +1,37 @@
 
-# used nodejs server
+# Mobile Web Specialist Certification Course (Completed)
+
+[My Official Certification](https://confirm.udacity.com/RYHDKPUW)
+
+---
+#### _Three Stage Course Material Project - Restaurant Reviews_
+
+## Project Overview: Stage 3
+
+My goal was to convert a static webpage to a mobile-ready web application. It considers full web-a11y features such as screen readers, voiceover, and keyboard tab support. You can get reviews for restaurants on a single page, with the option to add your own reviews. All screens are supported. 
+
+## Prerequisites
+
+Install Udacity server from github and install it per the instructions. It must be set up on the same host that you will be running the page from (which is not required to be localhost). Once installed, start it as described in the README.
+
+Make sure you have Python installed.
+
+## Running the webapp:
+
+To run the webapp on your local machine, run these commands:
+
 ```
 npm install
 cd app
 node server.js
 ```
 
-# Mobile Web Specialist Certification Course
----
-#### _Three Stage Course Material Project - Restaurant Reviews_
+## Acknowledgements
 
-## Project Overview: Stage 1
+### Leaflet.js and Mapbox:
 
-For the **Restaurant Reviews** projects, you will incrementally convert a static webpage to a mobile-ready web application. In **Stage One**, you will take a static design that lacks accessibility and convert the design to be responsive on different sized displays and accessible for screen reader use. You will also add a service worker to begin the process of creating a seamless offline experience for your users.
+This repository uses leafletjs with Mapbox to provide the maps.
 
-### Specification
+### IndexedDB
 
-You have been provided the code for a restaurant reviews website. The code has a lot of issues. It’s barely usable on a desktop browser, much less a mobile device. It also doesn’t include any standard accessibility features, and it doesn’t work offline at all. Your job is to update the code to resolve these issues while still maintaining the included functionality.
-
-### Done
+This repository uses idb as a wrapper for IndexedDB.
