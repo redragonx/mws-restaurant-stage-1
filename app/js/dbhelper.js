@@ -38,12 +38,12 @@ class DBHelper {
    * Change this to restaurants.json file location on your server.
    */
     static get DATABASE_URL() {
-        const port = 1337 // Change this to your server port
+        const port = 80 // Change this to your server port
         let dataURL = "";
         if (location.protocol.indexOf("https") !== -1) {
-            dataURL = `https://${location.hostname}:${port}/restaurants/`;
+            dataURL = `https://restaurantserver.herokuapp.com:${port}/restaurants/`;
         } else {
-            dataURL = `http://${location.hostname}:${port}/restaurants/`;
+            dataURL = `http://restaurantserver.herokuapp.com:${port}/restaurants/`;
         }
 
         return dataURL;
@@ -53,12 +53,12 @@ class DBHelper {
    * Review URL.
    */
     static get REVIEW_URL() {
-        const port = 1337 // Change this to your server port
+        const port = 80 // Change this to your server port
         let dataURL = "";
         if (location.protocol.indexOf("https") !== -1) {
-            dataURL = `https://${location.hostname}:${port}/reviews/`;
+            dataURL = `https://restaurantserver.herokuapp.com:${port}/reviews/`;
         } else {
-            dataURL = `http://${location.hostname}:${port}/reviews/`;
+            dataURL = `http://restaurantserver.herokuapp.com:${port}/reviews/`;
         }
 
         return dataURL;
