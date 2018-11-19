@@ -14,7 +14,7 @@ My goal was to convert a static webpage to a mobile-ready web application. It co
 
 ## Prerequisites
 
-Install Udacity server from github and install it per the instructions. It must be set up on the same host that you will be running the page from (which is not required to be localhost). Once installed, start it as described in the README.
+Install [Udacity server](https://github.com/redragonx/mws-restaurant-stage-3) from github and install it per the instructions. It must be set up on the same host that you will be running the page from (which is not required to be localhost). Once installed, start it as described in the README.
 
 Make sure you have Python installed.
 
