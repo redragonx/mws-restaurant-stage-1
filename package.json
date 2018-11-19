@@ -43,7 +43,7 @@
   "main": "server.js",
   "scripts": {
     "test": "gulp tests",
-    "start": "webpack src/js/main.js dist/bundle.js"
+    "start": "node app/server.js"
   },
   "repository": {
     "type": "git",
